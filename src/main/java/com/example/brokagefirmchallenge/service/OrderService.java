@@ -33,9 +33,7 @@ public class OrderService {
         BigDecimal totalCost = order.getPrice().multiply(order.getSize());
 
         if(order.getOrderSide() == OrderSide.BUY) {
-            Asset tryAsset = assetRepository
-                    .findByCustomerIdAndAssetName(customerId, CURRENCY_TRY)
-                    .orElseThrow(() -> new RuntimeException("Customer does not have TRY asset"));
+            Asset tryAsset = getRequiredAsset(customerId, CURRENCY_TRY);
 
             if (tryAsset.getUsableSize().compareTo(totalCost) < 0) throw new RuntimeException("Insufficient TRY asset");
 
@@ -44,9 +42,7 @@ public class OrderService {
         }
 
         if (order.getOrderSide() == OrderSide.SELL) {
-            Asset asset = assetRepository
-                    .findByCustomerIdAndAssetName(customerId, assetName)
-                    .orElseThrow(() -> new RuntimeException("Customer does not have " + assetName + " asset"));
+            Asset asset = getRequiredAsset(customerId, assetName);
 
             if (asset.getUsableSize().compareTo(order.getSize()) < 0) throw new RuntimeException("Insufficient " + assetName + " to SELL order");
 
@@ -79,17 +75,13 @@ public class OrderService {
             BigDecimal restoredAmount = size.multiply(price);
 
             if (order.getOrderSide() == OrderSide.BUY) {
-                Asset tryAsset = assetRepository
-                        .findByCustomerIdAndAssetName(customerId, CURRENCY_TRY)
-                        .orElseThrow(() -> new RuntimeException("Customer does not have TRY asset"));
+                Asset tryAsset = getRequiredAsset(customerId, CURRENCY_TRY);
                 tryAsset.setUsableSize(tryAsset.getUsableSize().add(restoredAmount));
                 assetRepository.save(tryAsset);
             }
 
             if (order.getOrderSide() == OrderSide.SELL) {
-                Asset asset = assetRepository
-                        .findByCustomerIdAndAssetName(customerId, assetName)
-                        .orElseThrow(() -> new RuntimeException("Customer does not have " + assetName + " asset"));
+                Asset asset = getRequiredAsset(customerId, assetName);
                 asset.setUsableSize(asset.getUsableSize().add(size));
                 assetRepository.save(asset);
             }
@@ -139,4 +131,11 @@ public class OrderService {
         return orderRepository.save(order);
 
     }
+
+    private Asset getRequiredAsset(Long customerId, String assetName) {
+        return assetRepository
+                .findByCustomerIdAndAssetName(customerId, assetName)
+                .orElseThrow(() -> new RuntimeException("Customer does not have " + assetName + " asset"));
+    }
+
 }
