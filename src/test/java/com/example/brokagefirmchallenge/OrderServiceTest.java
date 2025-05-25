@@ -49,6 +49,7 @@ public class OrderServiceTest {
 
         assertEquals(Status.PENDING, savedOrder.getStatus());
         assertEquals(new BigDecimal("1000"), tryAsset.getUsableSize());
+        assertEquals(new BigDecimal("2000"), tryAsset.getSize());
         verify(assetRepository).save(tryAsset);
     }
 
@@ -73,6 +74,10 @@ public class OrderServiceTest {
         Order savedOrder = orderService.createOrder(order);
 
         assertEquals(new BigDecimal("5"), tslaAsset.getUsableSize());
+        assertEquals(new BigDecimal("10"), tslaAsset.getSize());
+        assertEquals(Status.PENDING, savedOrder.getStatus());
+        verify(assetRepository).save(tslaAsset);
+        verify(orderRepository).save(savedOrder);
     }
 
     @Test
@@ -99,6 +104,7 @@ public class OrderServiceTest {
         orderService.deleteOrder(10L);
 
         assertEquals(new BigDecimal("7"), asset.getUsableSize());
+        assertEquals(new BigDecimal("10"), asset.getSize());
         verify(orderRepository).deleteById(10L);
     }
 
@@ -114,6 +120,7 @@ public class OrderServiceTest {
         orderService.deleteOrder(20L);
 
         assertEquals(new BigDecimal("1300"), tryAsset.getUsableSize());
+        assertEquals(new BigDecimal("2000"), tryAsset.getSize());
         verify(orderRepository).deleteById(20L);
     }
 
@@ -171,6 +178,71 @@ public class OrderServiceTest {
         assertEquals(2, result.size());
         assertEquals("TRY", result.get(0).getAssetName());
         verify(assetRepository).findByCustomerId(1L);
+    }
+
+    @Test
+    void matchOrder_shouldUpdateAssetForBuyOrder() {
+        Order buyOrder = new Order(1L, "AAPL", OrderSide.BUY, new BigDecimal("5"), new BigDecimal("100"), Status.PENDING, LocalDateTime.now());
+        buyOrder.setId(100L);
+
+        Asset existingAsset = new Asset(1L, "AAPL", new BigDecimal("10"), new BigDecimal("10"));
+
+        when(orderRepository.findById(100L)).thenReturn(Optional.of(buyOrder));
+        when(assetRepository.findByCustomerIdAndAssetName(1L, "AAPL")).thenReturn(Optional.of(existingAsset));
+        when(orderRepository.save(Mockito.any())).thenReturn(buyOrder);
+
+
+        Order matched = orderService.matchOrder(100L);
+
+        assertEquals(Status.MATCHED, matched.getStatus());
+        assertEquals(new BigDecimal("15"), existingAsset.getSize());
+        assertEquals(new BigDecimal("15"), existingAsset.getUsableSize());
+        verify(assetRepository).save(existingAsset);
+    }
+
+    @Test
+    void matchOrder_shouldUpdateTRYAndReduceSellAssetForSellOrder() {
+        Order sellOrder = new Order(2L, "TSLA", OrderSide.SELL, new BigDecimal("3"), new BigDecimal("200"), Status.PENDING, LocalDateTime.now());
+        sellOrder.setId(101L);
+
+        Asset tryAsset = new Asset(2L, "TRY", new BigDecimal("1000"), new BigDecimal("1000"));
+        Asset soldAsset = new Asset(2L, "TSLA", new BigDecimal("5"), new BigDecimal("5"));
+
+        when(orderRepository.findById(101L)).thenReturn(Optional.of(sellOrder));
+        when(assetRepository.findByCustomerIdAndAssetName(2L, "TRY")).thenReturn(Optional.of(tryAsset));
+        when(assetRepository.findByCustomerIdAndAssetName(2L, "TSLA")).thenReturn(Optional.of(soldAsset));
+        when(orderRepository.save(Mockito.any())).thenReturn(sellOrder);
+
+        Order matched = orderService.matchOrder(101L);
+
+        assertEquals(Status.MATCHED, matched.getStatus());
+        assertEquals(new BigDecimal("1600"), tryAsset.getSize());
+        assertEquals(new BigDecimal("1600"), tryAsset.getUsableSize());
+        assertEquals(new BigDecimal("2"), soldAsset.getSize());
+
+        verify(assetRepository).save(tryAsset);
+        verify(assetRepository).save(soldAsset);
+        verify(orderRepository).save(sellOrder);
+    }
+
+
+    @Test
+    void matchOrder_shouldThrowIfNotPending() {
+        Order order = new Order(1L, "AAPL", OrderSide.BUY, new BigDecimal("5"), new BigDecimal("100"), Status.MATCHED, LocalDateTime.now());
+        order.setId(102L);
+
+        when(orderRepository.findById(102L)).thenReturn(Optional.of(order));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> orderService.matchOrder(102L));
+        assertEquals("Only PENDING orders can be matched", ex.getMessage());
+    }
+
+    @Test
+    void matchOrder_shouldThrowIfOrderNotFound() {
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> orderService.matchOrder(999L));
+        assertEquals("Order not found with id: 999", ex.getMessage());
     }
 
 }
