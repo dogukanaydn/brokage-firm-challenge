@@ -48,7 +48,7 @@ public class OrderService {
                     .findByCustomerIdAndAssetName(customerId, assetName)
                     .orElseThrow(() -> new RuntimeException("Customer does not have " + assetName + " asset"));
 
-            if (asset.getUsableSize().compareTo(order.getSize()) < 0) throw new RuntimeException("Insufficient " + assetName + "to SELL order");
+            if (asset.getUsableSize().compareTo(order.getSize()) < 0) throw new RuntimeException("Insufficient " + assetName + " to SELL order");
 
             asset.setUsableSize(asset.getUsableSize().subtract(order.getSize()));
             assetRepository.save(asset);
