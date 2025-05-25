@@ -2,6 +2,8 @@ package com.example.brokagefirmchallenge.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "assets")
 public class Asset {
@@ -12,12 +14,14 @@ public class Asset {
 
     private Long customerId;
     private String assetName;
-    private double size;
-    private double usableSize;
+    @Column(precision = 19, scale = 4)
+    private BigDecimal size;
+    @Column(precision = 19, scale = 4)
+    private BigDecimal usableSize;
 
     public Asset() {}
 
-    public Asset(Long customerId, String assetName, double size, double usableSize) {
+    public Asset(Long customerId, String assetName, BigDecimal size, BigDecimal usableSize) {
         this.customerId = customerId;
         this.assetName = assetName;
         this.size = size;
@@ -48,19 +52,19 @@ public class Asset {
         this.assetName = assetName;
     }
 
-    public double getSize() {
+    public BigDecimal getSize() {
         return size;
     }
 
-    public void setSize(double size) {
+    public void setSize(BigDecimal size) {
         this.size = size;
     }
 
-    public double getUsableSize() {
+    public BigDecimal getUsableSize() {
         return usableSize;
     }
 
-    public void setUsableSize(double usableSize) {
+    public void setUsableSize(BigDecimal usableSize) {
         this.usableSize = usableSize;
     }
 }

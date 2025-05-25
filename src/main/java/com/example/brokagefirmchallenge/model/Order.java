@@ -4,6 +4,7 @@ import com.example.brokagefirmchallenge.model.enums.OrderSide;
 import com.example.brokagefirmchallenge.model.enums.Status;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,15 +19,17 @@ public class Order {
     private String assetName;
     @Enumerated(EnumType.STRING)
     private OrderSide orderSide;
-    private double size;
-    private double price;
+    @Column(precision = 19, scale = 4)
+    private BigDecimal size;
+    @Column(precision = 19, scale = 4)
+    private BigDecimal price;
     @Enumerated(EnumType.STRING)
     private Status status;
     private LocalDateTime createDate;
     
     public Order() {}
 
-    public Order(Long customerId, String assetName, OrderSide orderSide, double size, double price, Status status, LocalDateTime createDate) {
+    public Order(Long customerId, String assetName, OrderSide orderSide, BigDecimal size, BigDecimal price, Status status, LocalDateTime createDate) {
         this.customerId = customerId;
         this.assetName = assetName;
         this.orderSide = orderSide;
@@ -68,19 +71,19 @@ public class Order {
         this.orderSide = orderSide;
     }
 
-    public double getSize() {
+    public BigDecimal getSize() {
         return size;
     }
 
-    public void setSize(double size) {
+    public void setSize(BigDecimal size) {
         this.size = size;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
