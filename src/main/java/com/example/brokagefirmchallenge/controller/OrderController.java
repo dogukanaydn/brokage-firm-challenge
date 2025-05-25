@@ -38,4 +38,10 @@ public class OrderController {
         orderService.deleteOrder(id);
         return ResponseEntity.ok("You deleted the order");
     }
+
+    @PutMapping("/match/{id}")
+    public ResponseEntity<Order> matchOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.matchOrder(id));
+    }
+
 }

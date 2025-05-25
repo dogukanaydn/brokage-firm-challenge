@@ -97,4 +97,46 @@ public class OrderService {
             orderRepository.deleteById(id);
         }
     }
+
+    public Order matchOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+
+        if (order.getStatus() != Status.PENDING) throw new RuntimeException("Only PENDING orders can be matched");
+
+        String assetName = order.getAssetName();
+        Long customerId = order.getCustomerId();
+        BigDecimal size = order.getSize();
+        BigDecimal price = order.getPrice();
+        BigDecimal totalValue = size.multiply(price);
+
+        if (order.getOrderSide() == OrderSide.BUY) {
+            Asset asset = assetRepository
+                    .findByCustomerIdAndAssetName(customerId, assetName)
+                    .orElse(new Asset(customerId, assetName, BigDecimal.ZERO, BigDecimal.ZERO));
+            asset.setSize(asset.getSize().add(size));
+            asset.setUsableSize(asset.getUsableSize().add(size));
+            assetRepository.save(asset);
+        }
+
+        if (order.getOrderSide() == OrderSide.SELL) {
+            Asset tryAsset = assetRepository
+                    .findByCustomerIdAndAssetName(customerId, CURRENCY_TRY)
+                    .orElse(new Asset(customerId, CURRENCY_TRY, BigDecimal.ZERO, BigDecimal.ZERO));
+
+            Asset soldAsset = assetRepository
+                    .findByCustomerIdAndAssetName(customerId, order.getAssetName())
+                            .orElse(new Asset(customerId, order.getAssetName(), BigDecimal.ZERO, BigDecimal.ZERO));
+
+            tryAsset.setSize(tryAsset.getSize().add(totalValue));
+            tryAsset.setUsableSize(tryAsset.getUsableSize().add(totalValue));
+            soldAsset.setSize(soldAsset.getSize().subtract(size));
+            assetRepository.save(tryAsset);
+            assetRepository.save(soldAsset);
+        }
+
+        order.setStatus(Status.MATCHED);
+        return orderRepository.save(order);
+
+    }
 }
