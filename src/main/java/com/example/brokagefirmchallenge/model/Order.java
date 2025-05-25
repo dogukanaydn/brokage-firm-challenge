@@ -1,7 +1,7 @@
 package com.example.brokagefirmchallenge.model;
 
 import com.example.brokagefirmchallenge.model.enums.OrderSide;
-import com.example.brokagefirmchallenge.model.enums.OrderStatus;
+import com.example.brokagefirmchallenge.model.enums.Status;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -16,15 +16,17 @@ public class Order {
 
     private Long customerId;
     private String assetName;
+    @Enumerated(EnumType.STRING)
     private OrderSide orderSide;
     private double size;
     private double price;
-    private OrderStatus status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
     private LocalDateTime createDate;
     
     public Order() {}
 
-    public Order(Long customerId, String assetName, OrderSide orderSide, double size, double price, OrderStatus status, LocalDateTime createDate) {
+    public Order(Long customerId, String assetName, OrderSide orderSide, double size, double price, Status status, LocalDateTime createDate) {
         this.customerId = customerId;
         this.assetName = assetName;
         this.orderSide = orderSide;
@@ -82,11 +84,11 @@ public class Order {
         this.price = price;
     }
 
-    public OrderStatus getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(OrderStatus status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

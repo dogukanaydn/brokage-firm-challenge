@@ -1,5 +1,5 @@
 package com.example.brokagefirmchallenge.model.enums;
 
-public enum OrderStatus {
+public enum Status {
     PENDING, MATCHED, CANCELLED
 }

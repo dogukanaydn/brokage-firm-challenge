@@ -3,7 +3,7 @@ package com.example.brokagefirmchallenge.service;
 import com.example.brokagefirmchallenge.model.Asset;
 import com.example.brokagefirmchallenge.model.Order;
 import com.example.brokagefirmchallenge.model.enums.OrderSide;
-import com.example.brokagefirmchallenge.model.enums.OrderStatus;
+import com.example.brokagefirmchallenge.model.enums.Status;
 import com.example.brokagefirmchallenge.repository.AssetRepository;
 import com.example.brokagefirmchallenge.repository.OrderRepository;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class OrderService {
     }
 
     public Order createOrder(Order order) {
-        order.setStatus(OrderStatus.PENDING);
+        order.setStatus(Status.PENDING);
         order.setCreateDate(LocalDateTime.now());
 
         String assetName = order.getAssetName();

@@ -1,7 +1,6 @@
 package com.example.brokagefirmchallenge.repository;
 
 import com.example.brokagefirmchallenge.model.Order;
-import com.example.brokagefirmchallenge.model.enums.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
