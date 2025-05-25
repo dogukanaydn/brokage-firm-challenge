@@ -66,4 +66,34 @@ public class OrderService {
             return orderRepository.findByCustomerId(customerId);
         }
     }
+
+    public void deleteOrder(Long id) {
+        Order order = orderRepository.findById(Long.valueOf(id))
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+
+        if (order.getStatus() == Status.PENDING) {
+            String assetName = order.getAssetName();
+            Long customerId = order.getCustomerId();
+            double size = order.getSize();
+            double price = order.getPrice();
+
+            if (order.getOrderSide() == OrderSide.BUY) {
+                Asset tryAsset = assetRepository
+                        .findByCustomerIdAndAssetName(customerId, "TRY")
+                        .orElseThrow(() -> new RuntimeException("Customer does not have TRY asset"));
+                tryAsset.setUsableSize(tryAsset.getUsableSize() + (size * price));
+                assetRepository.save(tryAsset);
+            }
+
+            if (order.getOrderSide() == OrderSide.SELL) {
+                Asset asset = assetRepository
+                        .findByCustomerIdAndAssetName(customerId, assetName)
+                        .orElseThrow(() -> new RuntimeException("Customer does not have " + assetName + " asset"));
+                asset.setUsableSize(asset.getUsableSize() + size);
+                assetRepository.save(asset);
+            }
+
+            orderRepository.deleteById(id);
+        }
+    }
 }
