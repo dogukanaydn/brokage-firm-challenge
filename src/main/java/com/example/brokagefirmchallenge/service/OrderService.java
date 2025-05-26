@@ -86,7 +86,8 @@ public class OrderService {
                 assetRepository.save(asset);
             }
 
-            orderRepository.deleteById(id);
+            order.setStatus(Status.CANCELLED);
+            orderRepository.save(order);
         }
     }
 
