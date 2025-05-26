@@ -64,6 +64,10 @@ http://localhost:8080/api/orders/create
 
 http://localhost:8080/api/orders/list?customerId=1
 
+with from and to date filters
+
+http://localhost:8080/api/orders/list?customerId=1&from=2025-05-20T00:00:00&to=2025-05-27T23:59:59
+
 ### Delete Order
 
 http://localhost:8080/api/orders/delete/1
