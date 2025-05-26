@@ -187,19 +187,22 @@ public class OrderServiceTest {
         Order buyOrder = new Order(1L, "AAPL", OrderSide.BUY, new BigDecimal("5"), new BigDecimal("100"), Status.PENDING, LocalDateTime.now());
         buyOrder.setId(100L);
 
+        Asset tryAsset = new Asset(1L, "TRY", new BigDecimal("1000"), new BigDecimal("800"));
         Asset existingAsset = new Asset(1L, "AAPL", new BigDecimal("10"), new BigDecimal("10"));
 
         when(orderRepository.findById(100L)).thenReturn(Optional.of(buyOrder));
+        when(assetRepository.findByCustomerIdAndAssetName(1L, "TRY")).thenReturn(Optional.of(tryAsset));
         when(assetRepository.findByCustomerIdAndAssetName(1L, "AAPL")).thenReturn(Optional.of(existingAsset));
         when(orderRepository.save(Mockito.any())).thenReturn(buyOrder);
-
 
         Order matched = orderService.matchOrder(100L);
 
         assertEquals(Status.MATCHED, matched.getStatus());
         assertEquals(new BigDecimal("15"), existingAsset.getSize());
         assertEquals(new BigDecimal("15"), existingAsset.getUsableSize());
+        assertEquals(new BigDecimal("500"), tryAsset.getSize());
         verify(assetRepository).save(existingAsset);
+        verify(assetRepository).save(tryAsset);
     }
 
     @Test

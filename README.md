@@ -71,3 +71,8 @@ http://localhost:8080/api/orders/delete/1
 ### List Assets
 
 http://localhost:8080/api/assets/list?customerId=1
+
+
+### Match Order
+
+http://localhost:8080/api/orders/match/4

@@ -33,7 +33,7 @@ public class OrderController {
         return ResponseEntity.ok(orderService.listOrders(customerId, from, to));
     }
 
-    @DeleteMapping("/delete/{id}")
+    @PutMapping("/delete/{id}")
     public ResponseEntity<String> deleteOrder(@PathVariable Long id) {
         orderService.deleteOrder(id);
         return ResponseEntity.ok("You deleted the order");

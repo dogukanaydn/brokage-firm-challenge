@@ -104,12 +104,19 @@ public class OrderService {
         BigDecimal totalValue = size.multiply(price);
 
         if (order.getOrderSide() == OrderSide.BUY) {
+            Asset tryAsset = assetRepository
+                    .findByCustomerIdAndAssetName(customerId, CURRENCY_TRY)
+                    .orElse(new Asset(customerId, CURRENCY_TRY, BigDecimal.ZERO, BigDecimal.ZERO));
+            tryAsset.setSize(tryAsset.getSize().subtract(totalValue));
+
             Asset asset = assetRepository
                     .findByCustomerIdAndAssetName(customerId, assetName)
                     .orElse(new Asset(customerId, assetName, BigDecimal.ZERO, BigDecimal.ZERO));
             asset.setSize(asset.getSize().add(size));
             asset.setUsableSize(asset.getUsableSize().add(size));
+
             assetRepository.save(asset);
+            assetRepository.save(tryAsset);
         }
 
         if (order.getOrderSide() == OrderSide.SELL) {
