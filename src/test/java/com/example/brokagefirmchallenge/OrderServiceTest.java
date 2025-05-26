@@ -105,7 +105,8 @@ public class OrderServiceTest {
 
         assertEquals(new BigDecimal("7"), asset.getUsableSize());
         assertEquals(new BigDecimal("10"), asset.getSize());
-        verify(orderRepository).deleteById(10L);
+        assertEquals(Status.CANCELLED, order.getStatus());
+        verify(orderRepository).save(order);
     }
 
     @Test
@@ -121,7 +122,8 @@ public class OrderServiceTest {
 
         assertEquals(new BigDecimal("1300"), tryAsset.getUsableSize());
         assertEquals(new BigDecimal("2000"), tryAsset.getSize());
-        verify(orderRepository).deleteById(20L);
+        assertEquals(Status.CANCELLED, order.getStatus());
+        verify(orderRepository).save(order);
     }
 
 
