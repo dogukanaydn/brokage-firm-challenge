@@ -14,9 +14,9 @@ public class Asset {
 
     private Long customerId;
     private String assetName;
-    @Column(precision = 19, scale = 4)
+    @Column(precision = 19, scale = 2)
     private BigDecimal size;
-    @Column(precision = 19, scale = 4)
+    @Column(precision = 19, scale = 2)
     private BigDecimal usableSize;
 
     public Asset() {}

@@ -19,9 +19,9 @@ public class Order {
     private String assetName;
     @Enumerated(EnumType.STRING)
     private OrderSide orderSide;
-    @Column(precision = 19, scale = 4)
+    @Column(precision = 19, scale = 2)
     private BigDecimal size;
-    @Column(precision = 19, scale = 4)
+    @Column(precision = 19, scale = 2)
     private BigDecimal price;
     @Enumerated(EnumType.STRING)
     private Status status;
